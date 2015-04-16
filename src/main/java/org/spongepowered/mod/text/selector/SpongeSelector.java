@@ -15,7 +15,6 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.extent.Extent;
 
 import java.util.List;
-import java.util.Map;
 
 @NonnullByDefault
 public class SpongeSelector implements Selector {
@@ -87,6 +86,8 @@ public class SpongeSelector implements Selector {
             for (Argument<?> argument : this.arguments.values()) {
                 if (argument.getType().getKey().isPresent()) {
                     result.append(argument.getType().getKey().get()).append('=').append(argument.getValue());
+                } else {
+                    
                 }
             }
             result.append(']');

@@ -7,6 +7,32 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 @NonnullByDefault
 public class SpongeArgument<T> implements Argument<T> {
 
+    public static class Invertible<T> extends SpongeArgument<T> implements Argument.Invertible<T> {
+
+        private final boolean inverted;
+
+        public Invertible(ArgumentType<T> type, T value, String plain, boolean inverted) {
+            super(type, value, plain);
+            this.inverted = inverted;
+        }
+
+        @Override
+        String getEqualitySymbols() {
+            return isInverted() ? "!=" : "=";
+        }
+
+        @Override
+        public boolean isInverted() {
+            return this.inverted;
+        }
+
+        @Override
+        public Argument.Invertible<T> invert() {
+            return new SpongeArgument.Invertible<T>(this.getType(), this.getValue(), this.toPlain(), !this.isInverted());
+        }
+
+    }
+
     private final ArgumentType<T> type;
     private final T value;
     private final String plain;
@@ -15,6 +41,10 @@ public class SpongeArgument<T> implements Argument<T> {
         this.type = type;
         this.value = value;
         this.plain = plain;
+    }
+
+    String getEqualitySymbols() {
+        return "=";
     }
 
     @Override

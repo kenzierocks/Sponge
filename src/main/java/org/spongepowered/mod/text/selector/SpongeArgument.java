@@ -11,8 +11,8 @@ public class SpongeArgument<T> implements Argument<T> {
 
         private final boolean inverted;
 
-        public Invertible(ArgumentType<T> type, T value, String plain, boolean inverted) {
-            super(type, value, plain);
+        public Invertible(ArgumentType.Invertible<T> type, T value, boolean inverted) {
+            super(type, value);
             this.inverted = inverted;
         }
 
@@ -28,19 +28,17 @@ public class SpongeArgument<T> implements Argument<T> {
 
         @Override
         public Argument.Invertible<T> invert() {
-            return new SpongeArgument.Invertible<T>(this.getType(), this.getValue(), this.toPlain(), !this.isInverted());
+            return new SpongeArgument.Invertible<T>((ArgumentType.Invertible<T>) this.getType(), this.getValue(), !this.isInverted());
         }
 
     }
 
     private final ArgumentType<T> type;
     private final T value;
-    private final String plain;
 
-    public SpongeArgument(ArgumentType<T> type, T value, String plain) {
+    public SpongeArgument(ArgumentType<T> type, T value) {
         this.type = type;
         this.value = value;
-        this.plain = plain;
     }
 
     String getEqualitySymbols() {
@@ -59,7 +57,7 @@ public class SpongeArgument<T> implements Argument<T> {
 
     @Override
     public String toPlain() {
-        return this.plain;
+        return this.type.getKey() + getEqualitySymbols() + this.value;
     }
 
 }

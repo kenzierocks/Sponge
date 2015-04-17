@@ -14,6 +14,8 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.extent.Extent;
 
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 @NonnullByDefault
@@ -35,13 +37,15 @@ public class SpongeSelector implements Selector {
         return this.type;
     }
 
-    @Override @SuppressWarnings("unchecked")
+    @Override
+    @SuppressWarnings("unchecked")
     public <T> Optional<T> get(ArgumentType<T> type) {
         Argument<T> argument = (Argument<T>) this.arguments.get(type);
         return argument != null ? Optional.of(argument.getValue()) : Optional.<T>absent();
     }
 
-    @Override @SuppressWarnings("unchecked")
+    @Override
+    @SuppressWarnings("unchecked")
     public <T> Optional<Argument<T>> getArgument(ArgumentType<T> type) {
         return Optional.fromNullable((Argument<T>) this.arguments.get(type));
     }
@@ -83,11 +87,13 @@ public class SpongeSelector implements Selector {
 
         if (!this.arguments.isEmpty()) {
             result.append('[');
-            for (Argument<?> argument : this.arguments.values()) {
-                if (argument.getType().getKey().isPresent()) {
-                    result.append(argument.getType().getKey().get()).append('=').append(argument.getValue());
-                } else {
-                    
+            Collection<Argument<?>> args = this.arguments.values();
+            for (Iterator<Argument<?>> iter = args.iterator(); iter.hasNext();) {
+                Argument<?> arg = iter.next();
+                result.append(arg.getType().getKey()).append(((SpongeArgument<?>) arg).getEqualitySymbols())
+                        .append(arg.getValue());
+                if (iter.hasNext()) {
+                    result.append(',');
                 }
             }
             result.append(']');

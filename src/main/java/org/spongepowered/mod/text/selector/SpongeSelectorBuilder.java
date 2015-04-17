@@ -2,7 +2,6 @@ package org.spongepowered.mod.text.selector;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.text.selector.Argument;
@@ -58,7 +57,7 @@ public class SpongeSelectorBuilder implements SelectorBuilder {
 
     @Override
     public <T> SelectorBuilder add(ArgumentType<T> type, T value) {
-        this.arguments.put(type, new SpongeArgument<T>(type, value, null /* TODO */));
+        this.arguments.put(type, new SpongeArgument<T>(type, value));
         return this;
     }
 

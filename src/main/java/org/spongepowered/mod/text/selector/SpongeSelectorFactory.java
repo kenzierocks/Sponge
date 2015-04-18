@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import net.minecraft.command.PlayerSelector;
+import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.text.selector.Argument;
 import org.spongepowered.api.text.selector.ArgumentHolder;
 import org.spongepowered.api.text.selector.ArgumentType;
@@ -74,21 +75,12 @@ public class SpongeSelectorFactory implements SelectorFactory {
         }
     }
 
-    private final Map<String, ArgumentHolder.Limit<ArgumentType<Integer>>> scoreToTypeMap = Maps.newLinkedHashMap();
+    private final Map<String, ArgumentHolder.Limit<ArgumentType<Score>>> scoreToTypeMap = Maps.newLinkedHashMap();
     private final Map<String, ArgumentType<?>> argumentLookupMap = Maps.newLinkedHashMap();
-    private final Map<String, ArgumentType<?>> customArgumentMap = Maps.newLinkedHashMap();
 
     @SuppressWarnings("unchecked")
     private <T> Optional<T> recast(Optional<?> source) {
         return (Optional<T>) source;
-    }
-
-    private ArgumentType<?> fromCustom(String name) {
-        return this.customArgumentMap.get(name);
-    }
-
-    public SpongeSelectorFactory(Map<String, ArgumentType<?>> argumentMap) {
-        this.argumentLookupMap.putAll(argumentMap);
     }
 
     @Override
@@ -108,7 +100,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
             argListIndex = selector.length();
         }
         String typeStr = selector.substring(1, argListIndex);
-        Optional<SelectorType> type = SpongeMod.instance.getGame().getRegistry().getSelectorType(typeStr);
+        Optional<SelectorType> type = SpongeMod.instance.getGame().getRegistry().getType(SelectorType.class, typeStr);
         if (!type.isPresent()) {
             throw new IllegalArgumentException("No type known as '" + typeStr + "'");
         }
@@ -127,20 +119,18 @@ public class SpongeSelectorFactory implements SelectorFactory {
     }
 
     @Override
-    public ArgumentType.Limit<ArgumentType<Integer>> createScoreArgumentType(String name) {
+    public ArgumentHolder.Limit<ArgumentType<Score>> createScoreArgumentType(String name) {
         if (!this.scoreToTypeMap.containsKey(name)) {
-            SpongeArgumentType<Integer> min = new SpongeArgumentType<Integer>("score_" + name + "_min", Integer.class);
-            SpongeArgumentType<Integer> max = new SpongeArgumentType<Integer>("score_" + name, Integer.class);
-            this.scoreToTypeMap.put(name, new SpongeArgumentHolder.SpongeLimit<ArgumentType<Integer>>(min, max));
+            SpongeArgumentType<Score> min = createArgumentType("score_" + name + "_min", Score.class);
+            SpongeArgumentType<Score> max = createArgumentType("score_" + name, Score.class);
+            this.scoreToTypeMap.put(name, new SpongeArgumentHolder.SpongeLimit<ArgumentType<Score>>(min, max));
         }
         return this.scoreToTypeMap.get(name);
     }
 
     @Override
     public Optional<ArgumentType<?>> getArgumentType(String name) {
-        Optional<ArgumentType<?>> optional = recast(Optional.fromNullable(this.argumentLookupMap.get(name)));
-        ArgumentType<?> type = optional.or(fromCustom(name));
-        return recast(Optional.fromNullable(type));
+        return recast(Optional.fromNullable(this.argumentLookupMap.get(name)));
     }
 
     @Override
@@ -148,22 +138,30 @@ public class SpongeSelectorFactory implements SelectorFactory {
         return this.argumentLookupMap.values();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public ArgumentType<String> createArgumentType(String key) {
-        if (!this.customArgumentMap.containsKey(key)) {
-            this.customArgumentMap.put(key, new SpongeArgumentType<String>(key, String.class));
-        }
-        return (ArgumentType<String>) this.customArgumentMap.get(key);
+    public SpongeArgumentType<String> createArgumentType(String key) {
+        return createArgumentType(key, String.class);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> ArgumentType<T> createArgumentType(String key, Class<T> type) {
-        if (!this.customArgumentMap.containsKey(key)) {
-            this.customArgumentMap.put(key, new SpongeArgumentType<T>(key, type));
+    public <T> SpongeArgumentType<T> createArgumentType(String key, Class<T> type) {
+        if (!this.argumentLookupMap.containsKey(key)) {
+            this.argumentLookupMap.put(key, new SpongeArgumentType<T>(key, type));
         }
-        return (ArgumentType<T>) this.customArgumentMap.get(key);
+        return (SpongeArgumentType<T>) this.argumentLookupMap.get(key);
+    }
+
+    public SpongeArgumentType.Invertible<String> createInvertibleArgumentType(String key) {
+        return createInvertibleArgumentType(key, String.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> SpongeArgumentType.Invertible<T> createInvertibleArgumentType(String key, Class<T> type) {
+        if (!this.argumentLookupMap.containsKey(key)) {
+            this.argumentLookupMap.put(key, new SpongeArgumentType.Invertible<T>(key, type));
+        }
+        return (SpongeArgumentType.Invertible<T>) this.argumentLookupMap.get(key);
     }
 
     @Override

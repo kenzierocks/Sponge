@@ -102,7 +102,7 @@ public class SpongeArgumentHolder<T extends ArgumentHolder<?>> implements Argume
 
     }
 
-    public static class SpongeLimit<T extends ArgumentHolder<T>> extends SpongeArgumentHolder<T> implements ArgumentHolder.Limit<T> {
+    public static class SpongeLimit<T extends ArgumentHolder<?>> extends SpongeArgumentHolder<T> implements ArgumentHolder.Limit<T> {
 
         private final T min;
         private final T max;

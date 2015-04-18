@@ -17,4 +17,9 @@ public class SpongeSelectorType implements SelectorType {
         return this.id;
     }
 
+    @Override
+    public String getName() {
+        return getId();
+    }
+
 }

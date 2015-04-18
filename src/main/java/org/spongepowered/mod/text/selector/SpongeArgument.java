@@ -1,5 +1,7 @@
 package org.spongepowered.mod.text.selector;
 
+import org.spongepowered.api.CatalogType;
+
 import org.spongepowered.api.text.selector.Argument;
 import org.spongepowered.api.text.selector.ArgumentType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -33,6 +35,13 @@ public class SpongeArgument<T> implements Argument<T> {
 
     }
 
+    private static String toSelectorArgument(Object val) {
+        if (val instanceof CatalogType) {
+            return ((CatalogType) val).getId();
+        }
+        return String.valueOf(val);
+    }
+
     private final ArgumentType<T> type;
     private final T value;
 
@@ -57,7 +66,7 @@ public class SpongeArgument<T> implements Argument<T> {
 
     @Override
     public String toPlain() {
-        return this.type.getKey() + getEqualitySymbols() + this.value;
+        return this.type.getKey() + getEqualitySymbols() + toSelectorArgument(getValue());
     }
 
 }
